@@ -10,3 +10,4 @@ class Settings:
     PROVIDER_TYPE: str = os.getenv("AI_PROVIDER", "SIMULATED_CV") # "SIMULATED_CV" or "YOLO_V8"
 
 settings = Settings()
+

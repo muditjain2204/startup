@@ -5,3 +5,4 @@ pillow>=10.4.0
 numpy>=1.26.0
 requests>=2.32.0
 pydantic>=2.9.0
+

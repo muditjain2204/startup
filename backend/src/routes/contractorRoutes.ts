@@ -19,3 +19,4 @@ router.get('/:id', authenticate, getContractorById);
 router.patch('/:id/status', authenticate, requireRole(UserRole.ADMIN), updateContractorStatus);
 
 export default router;
+

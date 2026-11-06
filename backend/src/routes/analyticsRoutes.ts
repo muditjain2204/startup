@@ -8,3 +8,4 @@ router.get('/overview', authenticate, getDashboardOverview);
 router.get('/map-markers', getMapMarkers); // Accessible for public GIS view as well
 
 export default router;
+

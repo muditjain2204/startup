@@ -16,3 +16,4 @@ router.patch('/:id/status', authenticate, updateProjectStatus);
 router.post('/:id/updates', authenticate, upload.array('updatePhoto', 4), addProjectUpdate);
 
 export default router;
+

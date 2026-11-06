@@ -134,3 +134,4 @@ def get_detector() -> BaseDetector:
     if settings.PROVIDER_TYPE == "YOLO_V8":
         return YOLOv8Detector()
     return SimulatedComputerVisionDetector()
+

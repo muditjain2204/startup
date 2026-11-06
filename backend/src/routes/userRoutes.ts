@@ -9,3 +9,4 @@ router.get('/', authenticate, requireRole(UserRole.ADMIN), getUsers);
 router.patch('/:id/status', authenticate, requireRole(UserRole.ADMIN), updateUserStatus);
 
 export default router;
+

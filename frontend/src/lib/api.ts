@@ -47,3 +47,4 @@ export const apiFetch = async <T = any>(endpoint: string, options: RequestInit =
 
   return data as T;
 };
+

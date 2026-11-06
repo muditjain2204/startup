@@ -43,3 +43,4 @@ class DetectionResponse(BaseModel):
     overall_severity: str
     highest_confidence: float
     requires_immediate_action: bool
+

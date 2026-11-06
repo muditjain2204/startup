@@ -21,3 +21,4 @@ router.get('/:code', getQRByCode);
 router.post('/:code/scan', recordScan);
 
 export default router;
+

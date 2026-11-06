@@ -49,3 +49,4 @@ export const findEligibleContractors = async (targetLat: number, targetLng: numb
     .filter((c) => c.isEligible)
     .sort((a, b) => a.distanceKm - b.distanceKm);
 };
+

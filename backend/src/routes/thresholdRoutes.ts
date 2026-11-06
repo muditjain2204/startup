@@ -9,3 +9,4 @@ router.get('/', authenticate, getThresholds);
 router.put('/', authenticate, requireRole(UserRole.ADMIN), updateThresholds);
 
 export default router;
+

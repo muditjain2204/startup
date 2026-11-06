@@ -27,3 +27,4 @@ router.post('/:id/bids', authenticate, requireRole(UserRole.CONTRACTOR), submitB
 router.post('/:id/award', authenticate, requireRole(UserRole.ADMIN), awardContract);
 
 export default router;
+

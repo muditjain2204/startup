@@ -28,3 +28,4 @@ router.patch('/:id/verify', authenticate, requireRole(UserRole.ADMIN), verifyRep
 router.post('/:id/merge', authenticate, requireRole(UserRole.ADMIN), mergeReports);
 
 export default router;
+

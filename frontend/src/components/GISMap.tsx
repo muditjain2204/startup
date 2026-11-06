@@ -293,3 +293,4 @@ export const GISMap: React.FC<GISMapProps> = ({
     </div>
   );
 };
+
