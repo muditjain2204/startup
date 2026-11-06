@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  smartroad-db:
+    image: postgis/postgis:16-3.4
+    container_name: smartroad-db
+    environment:
+      POSTGRES_USER: smartroad
+      POSTGRES_PASSWORD: smartroad_pass
+      POSTGRES_DB: smartroad_ai
+    ports:
+      - "5434:5432"
+    volumes:
+      - smartroad_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  smartroad-backend:
+    build: ./backend
+    container_name: smartroad-backend
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      DATABASE_URL: "postgresql://smartroad:smartroad_pass@smartroad-db:5432/smartroad_ai?schema=public"
+      JWT_SECRET: "smartroad-enterprise-super-secret-jwt-key-2026"
+      AI_SERVICE_URL: "http://smartroad-ai:8000"
+      CLIENT_URL: "http://localhost:3000"
+    depends_on:
+      - smartroad-db
+
+  smartroad-ai:
+    build: ./ai-service
+    container_name: smartroad-ai
+    ports:
+      - "8000:8000"
+    environment:
+      AI_SERVICE_PORT: 8000
+      AI_PROVIDER: "SIMULATED_CV"
+
+  smartroad-frontend:
+    build: ./frontend
+    container_name: smartroad-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
+    depends_on:
+      - smartroad-backend
+
+volumes:
+  smartroad_pgdata:
