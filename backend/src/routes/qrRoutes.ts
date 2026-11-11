@@ -13,8 +13,8 @@ const router = Router();
 // Generate QR code (Admin only)
 router.post('/generate', authenticate, requireRole(UserRole.ADMIN), createQRCode);
 
-// List QR codes (Admin only)
-router.get('/', authenticate, requireRole(UserRole.ADMIN), getQRCodes);
+// List active QR stations
+router.get('/', getQRCodes);
 
 // Public scan and query
 router.get('/:code', getQRByCode);

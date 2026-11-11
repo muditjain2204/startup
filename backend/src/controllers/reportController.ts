@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import prisma from '../prisma';
 import { analyzeRoadMedia } from '../services/aiClient';
 import { checkPotentialDuplicates } from '../services/duplicateService';
+import { uploadToCloudinary } from '../services/cloudinaryService';
 import { DamageCategory, ReportStatus, SeverityLevel, UserRole } from '@prisma/client';
 
 export const createReport = async (req: AuthRequest, res: Response) => {
@@ -63,7 +64,13 @@ export const createReport = async (req: AuthRequest, res: Response) => {
     if (uploadedFiles && uploadedFiles.length > 0) {
       for (const f of uploadedFiles) {
         const isVideo = f.mimetype.startsWith('video/') || f.originalname.endsWith('.mp4');
-        const mediaUrl = `/uploads/evidence/${f.filename}`;
+        let mediaUrl = `/uploads/evidence/${f.filename}`;
+
+        // Upload to Cloudinary if credentials are configured
+        const cloudUrl = await uploadToCloudinary(f.path, 'smartroad_evidence');
+        if (cloudUrl) {
+          mediaUrl = cloudUrl;
+        }
 
         await prisma.damageEvidence.create({
           data: {

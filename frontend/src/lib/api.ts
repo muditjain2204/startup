@@ -1,4 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const getApiUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.hostname}:5001/api`;
+  }
+  return 'http://localhost:5001/api';
+};
 
 export const getAuthToken = (): string | null => {
   if (typeof window !== 'undefined') {
@@ -20,6 +28,16 @@ export const removeAuthToken = () => {
   }
 };
 
+export const getFileUrl = (path?: string | null): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  const apiUrl = getApiUrl();
+  const baseUrl = apiUrl.replace(/\/api\/?$/, '');
+  return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+};
+
 export const apiFetch = async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const token = getAuthToken();
   const headers: Record<string, string> = {
@@ -34,7 +52,8 @@ export const apiFetch = async <T = any>(endpoint: string, options: RequestInit =
     headers['Content-Type'] = 'application/json';
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const apiUrl = getApiUrl();
+  const response = await fetch(`${apiUrl}${endpoint}`, {
     ...options,
     headers,
   });

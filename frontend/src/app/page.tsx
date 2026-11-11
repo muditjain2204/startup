@@ -49,17 +49,16 @@ export default function HomePage() {
       .then((data) => setMarkers(data))
       .catch(() => {});
 
-    // Fetch dashboard overview KPIs if possible
+    // Fetch dashboard overview KPIs
     apiFetch('/analytics/overview')
       .then((data) => setStats(data.kpis))
       .catch(() => {
-        // Fallback default statistics from realistic seed
         setStats({
-          totalReports: 1420,
-          verifiedReports: 1180,
-          repairedReports: 890,
-          totalContractors: 38,
-          totalQRScans: 4850,
+          totalReports: 0,
+          verifiedReports: 0,
+          repairedReports: 0,
+          totalContractors: 0,
+          totalQRScans: 0,
         });
       });
   }, []);
@@ -116,15 +115,15 @@ export default function HomePage() {
               {/* Quick live metrics */}
               <div className="pt-6 grid grid-cols-3 gap-4 border-t border-slate-200 text-slate-700">
                 <div>
-                  <div className="text-2xl font-black text-slate-900">{stats?.totalReports || '1,400+'}</div>
+                  <div className="text-2xl font-black text-slate-900">{stats ? stats.totalReports : 0}</div>
                   <div className="text-xs text-slate-500 font-medium">Damage Reports Detected</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-blue-600">{stats?.repairedReports || '890+'}</div>
+                  <div className="text-2xl font-black text-blue-600">{stats ? stats.repairedReports : 0}</div>
                   <div className="text-xs text-slate-500 font-medium">Repairs Completed</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-slate-900">{stats?.totalContractors || '38'}</div>
+                  <div className="text-2xl font-black text-slate-900">{stats ? stats.totalContractors : 0}</div>
                   <div className="text-xs text-slate-500 font-medium">Verified Contractors</div>
                 </div>
               </div>

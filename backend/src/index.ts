@@ -12,6 +12,8 @@ import analyticsRoutes from './routes/analyticsRoutes';
 import userRoutes from './routes/userRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import thresholdRoutes from './routes/thresholdRoutes';
+import cronRoutes from './routes/cronRoutes';
+import { startCronJobs } from './services/cronService';
 
 dotenv.config();
 
@@ -53,6 +55,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/thresholds', thresholdRoutes);
+app.use('/api/cron', cronRoutes);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -65,6 +68,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(PORT, () => {
   console.log(`🚀 SmartRoad AI Backend running on http://localhost:${PORT}`);
   console.log(`📂 Serving uploaded static media from ${uploadsPath}`);
+  // Launch scheduled cron maintenance jobs
+  startCronJobs();
 });
 
 export default app;

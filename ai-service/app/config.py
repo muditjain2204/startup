@@ -8,6 +8,7 @@ class Settings:
     MIN_ESTIMATED_DEPTH_CM: float = float(os.getenv("MIN_DEPTH_CM", "3.0"))
     CRITICAL_DEPTH_CM: float = float(os.getenv("CRITICAL_DEPTH_CM", "8.0"))
     PROVIDER_TYPE: str = os.getenv("AI_PROVIDER", "SIMULATED_CV") # "SIMULATED_CV" or "YOLO_V8"
+    YOLO_MODEL_PATH: str = os.getenv("YOLO_MODEL_PATH", "road_defect_yolov8.pt")
 
 settings = Settings()
 

@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import prisma from '../prisma';
 import { ProjectStatus, RepairStage, ReportStatus, UserRole } from '@prisma/client';
+import { uploadToCloudinary } from '../services/cloudinaryService';
 
 export const getProjects = async (req: AuthRequest, res: Response) => {
   try {
@@ -172,7 +173,12 @@ export const addProjectUpdate = async (req: AuthRequest, res: Response) => {
     const singleFile = req.file as Express.Multer.File;
     const uploadedFiles = files || (singleFile ? [singleFile] : []);
 
-    const photoUrls = uploadedFiles.map((f) => `/uploads/updates/${f.filename}`);
+    const photoUrls: string[] = [];
+
+    for (const f of uploadedFiles) {
+      const cloudUrl = await uploadToCloudinary(f.path, 'smartroad_updates');
+      photoUrls.push(cloudUrl || `/uploads/updates/${f.filename}`);
+    }
 
     if (photoUrls.length === 0 && req.body.photoUrl) {
       photoUrls.push(req.body.photoUrl);

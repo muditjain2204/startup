@@ -119,7 +119,10 @@ export const Navbar: React.FC = () => {
           <div className="hidden xl:flex items-center space-x-2 bg-blue-50/70 border border-blue-200/60 px-3 py-1.5 rounded-full text-xs">
             <span className="text-blue-900 font-medium text-[11px] mr-1">Switch Role:</span>
             <button
-              onClick={() => switchDemoUser('ADMIN')}
+              onClick={async () => {
+                await switchDemoUser('ADMIN');
+                window.location.href = '/admin';
+              }}
               className={`px-2 py-0.5 rounded text-[11px] font-semibold transition ${
                 user?.role === 'ADMIN' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-blue-100'
               }`}
@@ -127,7 +130,10 @@ export const Navbar: React.FC = () => {
               Admin PWD
             </button>
             <button
-              onClick={() => switchDemoUser('CONTRACTOR_RAJPUT')}
+              onClick={async () => {
+                await switchDemoUser('CONTRACTOR_RAJPUT');
+                window.location.href = '/contractor';
+              }}
               className={`px-2 py-0.5 rounded text-[11px] font-semibold transition ${
                 user?.role === 'CONTRACTOR' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-blue-100'
               }`}
@@ -135,7 +141,10 @@ export const Navbar: React.FC = () => {
               Contractor
             </button>
             <button
-              onClick={() => switchDemoUser('CITIZEN')}
+              onClick={async () => {
+                await switchDemoUser('CITIZEN');
+                window.location.href = '/citizen';
+              }}
               className={`px-2 py-0.5 rounded text-[11px] font-semibold transition ${
                 user?.role === 'USER' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-blue-100'
               }`}
