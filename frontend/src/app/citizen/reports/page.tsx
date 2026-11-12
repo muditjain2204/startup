@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Search,
 } from 'lucide-react';
+import MediaViewer from '@/components/MediaViewer';
 
 export default function MyReportsPage() {
   const { user } = useAuth();
@@ -143,15 +144,20 @@ export default function MyReportsPage() {
 
                 {/* Content details */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                  {/* Photo Thumbnail */}
+                  {/* Photo / Video Thumbnail */}
                   <div className="md:col-span-1">
                     {evidencePhoto ? (
                       <div className="aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
-                        <img src={evidencePhoto} alt="Report evidence" className="w-full h-full object-cover" />
+                        <MediaViewer
+                          src={evidencePhoto}
+                          mediaType={report.evidence && report.evidence[0]?.mediaType}
+                          thumbnailUrl={report.evidence && report.evidence[0]?.thumbnailUrl}
+                          alt="Report evidence"
+                        />
                       </div>
                     ) : (
                       <div className="aspect-video rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 text-xs">
-                        No image
+                        No visual evidence
                       </div>
                     )}
                   </div>

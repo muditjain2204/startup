@@ -45,7 +45,7 @@ export const analyzeRoadMedia = async (
       headers: {
         ...formData.getHeaders(),
       },
-      timeout: 10000,
+      timeout: 60000, // 60s timeout to allow video frame extraction and defect scanning
     });
 
     return response.data;

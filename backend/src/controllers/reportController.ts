@@ -63,7 +63,11 @@ export const createReport = async (req: AuthRequest, res: Response) => {
 
     if (uploadedFiles && uploadedFiles.length > 0) {
       for (const f of uploadedFiles) {
-        const isVideo = f.mimetype.startsWith('video/') || f.originalname.endsWith('.mp4');
+        const isVideo =
+          f.mimetype.startsWith('video/') ||
+          /\.(mp4|mov|webm|avi|m4v|3gp|mkv)$/i.test(f.originalname) ||
+          /\.(mp4|mov|webm|avi|m4v|3gp|mkv)$/i.test(f.filename);
+
         let mediaUrl = `/uploads/evidence/${f.filename}`;
 
         // Upload to Cloudinary if credentials are configured
@@ -72,22 +76,27 @@ export const createReport = async (req: AuthRequest, res: Response) => {
           mediaUrl = cloudUrl;
         }
 
+        if (!aiDetectionResult) {
+          aiDetectionResult = await analyzeRoadMedia(f.path, lat, lng);
+        }
+
+        const thumbnail =
+          isVideo && aiDetectionResult?.detections?.[0]?.annotated_image_base64
+            ? aiDetectionResult.detections[0].annotated_image_base64
+            : mediaUrl;
+
         await prisma.damageEvidence.create({
           data: {
             reportId: report.id,
             mediaType: isVideo ? 'VIDEO' : 'IMAGE',
             mediaUrl,
-            thumbnailUrl: mediaUrl,
+            thumbnailUrl: thumbnail,
             fileSize: f.size,
-            mimeType: f.mimetype,
+            mimeType: f.mimetype || (isVideo ? 'video/mp4' : 'image/jpeg'),
             gpsLat: lat,
             gpsLng: lng,
           },
         });
-
-        if (!aiDetectionResult) {
-          aiDetectionResult = await analyzeRoadMedia(f.path, lat, lng);
-        }
       }
     }
 

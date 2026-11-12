@@ -16,6 +16,7 @@ import {
   FileText,
   ShieldCheck,
 } from 'lucide-react';
+import MediaViewer from '@/components/MediaViewer';
 
 export default function ContractDetailsBiddingPage() {
   const params = useParams();
@@ -145,7 +146,12 @@ export default function ContractDetailsBiddingPage() {
 
             {evidencePhoto ? (
               <div className="aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
-                <img src={evidencePhoto} alt="Damage evidence" className="w-full h-full object-cover" />
+                <MediaViewer
+                  src={evidencePhoto}
+                  mediaType={damageReport?.evidence && damageReport.evidence[0]?.mediaType}
+                  thumbnailUrl={damageReport?.evidence && damageReport.evidence[0]?.thumbnailUrl}
+                  alt="Damage evidence"
+                />
               </div>
             ) : (
               <div className="aspect-video rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 text-xs">

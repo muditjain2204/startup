@@ -43,6 +43,7 @@ export const uploadToCloudinary = async (
     const result = await cloudinary.uploader.upload(filePath, {
       folder,
       resource_type: 'auto',
+      timeout: 120000,
     });
     return result.secure_url;
   } catch (err: any) {

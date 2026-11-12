@@ -47,26 +47,35 @@ async def detect_damage(
     Receives an image/video file, processes road surface characteristics,
     and returns detected potholes, cracks, or surface breaks with estimated severity.
     """
-    content_type = file.content_type or ""
+    content_type = (file.content_type or "").lower()
     filename = file.filename or "unknown.jpg"
+    is_video = (
+        content_type.startswith("video/")
+        or filename.lower().endswith((".mp4", ".mov", ".avi", ".webm", ".mkv", ".m4v", ".3gp"))
+    )
+    is_image = (
+        content_type.startswith("image/")
+        or filename.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".bmp"))
+    )
 
-    if not (content_type.startswith("image/") or content_type.startswith("video/") or filename.endswith((".jpg", ".jpeg", ".png", ".mp4", ".mov"))):
-        raise HTTPException(status_code=400, detail="Invalid media type. Please upload a road photo or video.")
+    if not (is_image or is_video):
+        raise HTTPException(status_code=400, detail="Invalid media type. Please upload a road photograph or recorded video.")
 
     try:
         contents = await file.read()
         detector = get_detector()
-        detections, provider_name = detector.detect(contents, filename)
+        detections, provider_name, processed_frames = detector.detect(contents, filename)
 
         highest_conf = max([d.confidence for d in detections]) if detections else 0.0
         severities = [d.severity for d in detections]
         overall_sev = "CRITICAL" if "CRITICAL" in severities else ("HIGH" if "HIGH" in severities else "MEDIUM")
 
+        frame_info = f"Analyzed {processed_frames} video frame(s)" if is_video else "Analyzed road photo"
         return DetectionResponse(
             success=True,
             provider=provider_name,
-            message=f"Processed road media '{filename}'. Found {len(detections)} defect signature(s).",
-            processed_frames=1,
+            message=f"{frame_info} from '{filename}'. Identified {len(detections)} defect signature(s).",
+            processed_frames=processed_frames,
             detections=detections,
             overall_severity=overall_sev,
             highest_confidence=highest_conf,

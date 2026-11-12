@@ -15,6 +15,7 @@ import {
   FileText,
   AlertTriangle,
 } from 'lucide-react';
+import MediaViewer from '@/components/MediaViewer';
 
 export default function AdminProjectInspectPage() {
   const params = useParams();
@@ -157,7 +158,7 @@ export default function AdminProjectInspectPage() {
                 </span>
 
                 <div className="aspect-video rounded-lg overflow-hidden bg-black border border-slate-200">
-                  <img src={photos[0]} alt="Milestone photo" className="w-full h-full object-cover" />
+                  <MediaViewer src={photos[0]} alt="Milestone evidence" />
                 </div>
 
                 <p className="text-slate-600 leading-relaxed text-[11px]">{u.notes}</p>

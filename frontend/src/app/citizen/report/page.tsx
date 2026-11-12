@@ -13,8 +13,12 @@ import {
   Cpu,
   Sparkles,
   ArrowRight,
+  Video,
+  Film,
+  X,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import MediaViewer from '@/components/MediaViewer';
 
 const DynamicGISMap = dynamic(() => import('@/components/GISMap').then((m) => m.GISMap), {
   ssr: false,
@@ -39,9 +43,15 @@ function ReportDamageForm() {
   const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
   const [gpsStatus, setGpsStatus] = useState<string>('Detecting location...');
 
-  // Media files
-  const [files, setFiles] = useState<File[]>([]);
-  const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  // Media files & rich video previews
+  interface UploadItem {
+    file: File;
+    previewUrl: string;
+    isVideo: boolean;
+    name: string;
+    sizeMb: string;
+  }
+  const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
 
   // Submission & AI Analysis Result
   const [loading, setLoading] = useState(false);
@@ -71,15 +81,37 @@ function ReportDamageForm() {
     }
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selected = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...selected]);
+  const handleFilesAdded = (incoming: FileList | File[]) => {
+    const fileList = Array.from(incoming);
+    const validItems: UploadItem[] = [];
 
-      // Generate previews
-      const newPreviews = selected.map((f) => URL.createObjectURL(f));
-      setFilePreviews((prev) => [...prev, ...newPreviews]);
+    for (const f of fileList) {
+      if (f.size > 100 * 1024 * 1024) {
+        alert(`File "${f.name}" exceeds the 100MB limit. Please trim the video.`);
+        continue;
+      }
+      const isVideo =
+        f.type.startsWith('video/') ||
+        /\.(mp4|mov|webm|avi|m4v|3gp|mkv)$/i.test(f.name);
+
+      validItems.push({
+        file: f,
+        previewUrl: URL.createObjectURL(f),
+        isVideo,
+        name: f.name,
+        sizeMb: (f.size / (1024 * 1024)).toFixed(1) + ' MB',
+      });
     }
+
+    setUploadItems((prev) => [...prev, ...validItems]);
+  };
+
+  const removeUploadItem = (index: number) => {
+    setUploadItems((prev) => {
+      const target = prev[index];
+      if (target) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleLocationPick = (lat: number, lng: number) => {
@@ -90,7 +122,7 @@ function ReportDamageForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (files.length === 0) {
+    if (uploadItems.length === 0) {
       alert('Please upload or capture at least one photograph or video of the road defect.');
       return;
     }
@@ -109,8 +141,8 @@ function ReportDamageForm() {
       formData.append('city', city);
       if (qrCode) formData.append('qrCode', qrCode);
 
-      for (const file of files) {
-        formData.append('files', file);
+      for (const item of uploadItems) {
+        formData.append('files', item.file);
       }
 
       const res = await apiFetch('/reports', {
@@ -245,8 +277,7 @@ function ReportDamageForm() {
             <button
               onClick={() => {
                 setSubmissionComplete(false);
-                setFiles([]);
-                setFilePreviews([]);
+                setUploadItems([]);
                 setTitle('');
                 setDescription('');
               }}
@@ -266,36 +297,102 @@ function ReportDamageForm() {
                 <Camera className="w-4 h-4 text-blue-600" />
                 <span>1. Photographic & Video Evidence *</span>
               </label>
-              <span className="text-[11px] text-slate-500">Max 50MB (JPEG, PNG, MP4)</span>
+              <span className="text-[11px] text-slate-500">Max 100MB (JPEG, PNG, MP4, MOV, WEBM)</span>
             </div>
 
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-blue-500 bg-slate-50 transition cursor-pointer relative">
+            {/* Upload Buttons: Photo or Video */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="flex items-center justify-center space-x-2 p-3.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 rounded-xl font-bold cursor-pointer transition">
+                <Camera className="w-4 h-4" />
+                <span>Capture / Upload Photos</span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => e.target.files && handleFilesAdded(e.target.files)}
+                  className="hidden"
+                />
+              </label>
+
+              <label className="flex items-center justify-center space-x-2 p-3.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-xl font-bold cursor-pointer transition">
+                <Video className="w-4 h-4" />
+                <span>Record / Upload Road Video</span>
+                <input
+                  type="file"
+                  multiple
+                  accept="video/*,.mp4,.mov,.webm,.avi"
+                  onChange={(e) => e.target.files && handleFilesAdded(e.target.files)}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Drag & Drop Unified Box */}
+            <div className="border-2 border-dashed border-slate-300 rounded-xl p-5 text-center hover:border-blue-500 bg-slate-50 transition cursor-pointer relative">
               <input
                 type="file"
                 multiple
                 accept="image/*,video/*"
-                onChange={handleFileChange}
+                onChange={(e) => e.target.files && handleFilesAdded(e.target.files)}
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
               />
-              <div className="space-y-2 flex flex-col items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
-                  <Upload className="w-5 h-5" />
+              <div className="space-y-1.5 flex flex-col items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center">
+                  <Upload className="w-4 h-4" />
                 </div>
-                <p className="font-bold text-slate-800">
-                  Click to capture or upload road photographs / video
+                <p className="font-bold text-slate-800 text-xs">
+                  Or drag & drop road photographs or survey videos here
                 </p>
                 <p className="text-slate-500 text-[11px]">
-                  Supports mobile camera direct capture or gallery files
+                  AI Vision will sample key video frames and identify defect boundaries
                 </p>
               </div>
             </div>
 
-            {/* Previews */}
-            {filePreviews.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-2">
-                {filePreviews.map((src, i) => (
-                  <div key={i} className="relative aspect-video rounded-lg overflow-hidden border border-slate-200 bg-black">
-                    <img src={src} alt="Defect Evidence" className="w-full h-full object-cover" />
+            {/* Rich Previews with Video Controls & Delete */}
+            {uploadItems.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+                {uploadItems.map((item, i) => (
+                  <div key={i} className="relative aspect-video rounded-xl overflow-hidden border border-slate-200 bg-black group shadow-sm">
+                    {item.isVideo ? (
+                      <video
+                        src={item.previewUrl}
+                        controls
+                        playsInline
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <img
+                        src={item.previewUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      onClick={() => removeUploadItem(i)}
+                      title="Remove file"
+                      className="absolute top-1.5 right-1.5 bg-red-600/90 hover:bg-red-700 text-white rounded-full p-1 shadow transition z-10"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Badge */}
+                    <div className="absolute bottom-1.5 left-1.5 text-[10px] font-semibold text-white bg-black/75 backdrop-blur px-2 py-0.5 rounded-full pointer-events-none flex items-center space-x-1">
+                      {item.isVideo ? (
+                        <>
+                          <Film className="w-2.5 h-2.5 text-purple-400" />
+                          <span>Video ({item.sizeMb})</span>
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="w-2.5 h-2.5 text-blue-400" />
+                          <span>Photo ({item.sizeMb})</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -402,7 +499,11 @@ function ReportDamageForm() {
             {loading ? (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Running AI Road Surface Vision Analysis...</span>
+                <span>
+                  {uploadItems.some((i) => i.isVideo)
+                    ? 'Extracting video frames and running AI defect detection...'
+                    : 'Running AI road distress detection & severity scoring...'}
+                </span>
               </div>
             ) : (
               <>

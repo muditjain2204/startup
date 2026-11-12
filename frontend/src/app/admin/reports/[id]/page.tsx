@@ -18,6 +18,7 @@ import {
   FileSpreadsheet,
   Copy,
 } from 'lucide-react';
+import MediaViewer from '@/components/MediaViewer';
 
 export default function AdminReportVerifyPage() {
   const params = useParams();
@@ -124,7 +125,10 @@ export default function AdminReportVerifyPage() {
   }
 
   const detection = report.detections && report.detections[0];
-  const photo = report.evidence && report.evidence[0]?.mediaUrl;
+  const evidenceItem = report.evidence && report.evidence[0];
+  const photo = evidenceItem?.mediaUrl;
+  const mediaType = evidenceItem?.mediaType;
+  const thumbnailUrl = evidenceItem?.thumbnailUrl;
   const isVerified = report.status === 'VERIFIED';
   const hasContract = !!report.repairContract;
 
@@ -253,11 +257,35 @@ export default function AdminReportVerifyPage() {
 
             {photo ? (
               <div className="aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
-                <img src={photo} alt="Report evidence" className="w-full h-full object-cover" />
+                <MediaViewer
+                  src={photo}
+                  mediaType={mediaType}
+                  thumbnailUrl={thumbnailUrl}
+                  alt="Report evidence"
+                />
               </div>
             ) : (
               <div className="aspect-video rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 text-xs">
-                No photo evidence
+                No visual evidence
+              </div>
+            )}
+
+            {/* Additional Attached Media Gallery */}
+            {report.evidence && report.evidence.length > 1 && (
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <span className="text-xs font-bold text-slate-700 block">Additional Attached Evidence:</span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {report.evidence.slice(1).map((ev: any, idx: number) => (
+                    <div key={idx} className="aspect-video rounded-lg overflow-hidden bg-black border border-slate-200">
+                      <MediaViewer
+                        src={ev.mediaUrl}
+                        mediaType={ev.mediaType}
+                        thumbnailUrl={ev.thumbnailUrl}
+                        alt={`Evidence ${idx + 2}`}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

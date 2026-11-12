@@ -25,7 +25,17 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+    const rawExt = path.extname(file.originalname).toLowerCase();
+    let ext = rawExt;
+    if (!ext) {
+      if (file.mimetype.startsWith('video/')) {
+        ext = '.mp4';
+      } else if (file.mimetype === 'application/pdf') {
+        ext = '.pdf';
+      } else {
+        ext = '.jpg';
+      }
+    }
     cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
   },
 });
@@ -33,16 +43,19 @@ const storage = multer.diskStorage({
 export const upload = multer({
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB for video/photos
+    fileSize: 100 * 1024 * 1024, // 100MB limit to comfortably allow road survey videos
   },
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|webp|mp4|mov|webm|pdf/;
+    const isImage = file.mimetype.startsWith('image/');
+    const isVideo = file.mimetype.startsWith('video/');
+    const isPdf = file.mimetype === 'application/pdf';
     const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-    const mime = file.mimetype;
-    if (allowed.test(ext) || allowed.test(mime)) {
+    const allowedExts = /^(jpeg|jpg|png|webp|gif|bmp|mp4|mov|webm|avi|mkv|m4v|3gp|pdf)$/i;
+
+    if (isImage || isVideo || isPdf || allowedExts.test(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file format. Only JPEG, PNG, WEBP, MP4, MOV, and PDF are allowed.'));
+      cb(new Error('Invalid file format. Please upload road photographs (JPEG, PNG, WEBP) or videos (MP4, MOV, WEBM, AVI, 3GP).'));
     }
   },
 });

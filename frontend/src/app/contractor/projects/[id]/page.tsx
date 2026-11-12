@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   FileText,
 } from 'lucide-react';
+import MediaViewer from '@/components/MediaViewer';
 
 export default function ContractorProjectManagePage() {
   const params = useParams();
@@ -274,7 +275,7 @@ export default function ContractorProjectManagePage() {
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
                           {photos.map((src, i) => (
                             <div key={i} className="aspect-video rounded-lg overflow-hidden border border-slate-200 bg-black">
-                              <img src={src} alt="Evidence" className="w-full h-full object-cover" />
+                              <MediaViewer src={src} alt="Evidence" />
                             </div>
                           ))}
                         </div>
